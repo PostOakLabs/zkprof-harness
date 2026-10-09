@@ -1,0 +1,32 @@
+{
+  "type": "ZkVmReceipt",
+  "system": "risc0",
+  "receiptFormat": "groth16-bn254",
+  "imageId": "sha256:a1a0bc89b5b1febaeda3519f6dbade0fa5ac16beeb143c4e1b01689573567bc6",
+  "seal": "GpouG4DiitjkdoltG7zvTOirMNvF3MtencacZLEPj4sIQIunbf+ElXhd7ew6RXwiw9OUQokvzmvUAEmJxz9vjyHuLt2DlnxKnF5z5ic1l+b6QrMKVQIHqymm1cerrfhLBCSe1CkgY40gkt2Zhe/rBGJ1NqKvmEv07S/oQPVF1mwt1fH2FOasZFEsmYw0E5vFvk8oyPeVqLK0bjmLwR35FhCdfrzjPstumV7df/1mxdQ/BwEVKzmK6olP+fUu7Hh+ILttROmjOzhACE2qvt5Mgwi+3DXYCAcipM+Ccji6mt8JFVq8K6Tad/RyGRRovAUwuSvAsfN6tqAhtEy9Wj4Z+g==",
+  "journal": {
+    "chaingraph_version": "0.4.0",
+    "kernel_digest": "sha256:e6ea4f134e6e8a83ead3c9b8c4003302fff90bb70c26a05c76538c4722c64e41",
+    "output": {
+      "application_fee_excluded": 0,
+      "bona_fide_fee_annual_limit": 100,
+      "credit_card_annual_fee_included": 0,
+      "credit_insurance_premium_total": 200,
+      "effective_finance_charge": 800,
+      "exceeds_cap": false,
+      "is_credit_card": false,
+      "loan_amount": 10000,
+      "mapr_cap_pct": 36,
+      "mapr_pct": 28,
+      "participation_fee_excluded": 0,
+      "pii_note": "All inputs are processed locally in your browser. No data is transmitted.",
+      "regulatory_basis": "10 USC §987(b); 32 CFR §232.4(c); DoD MLA rule effective Oct 3, 2016",
+      "stated_apr_pct": 28,
+      "table_source": "10 USC §987(b); 32 CFR Part 232 (Federal Register 80 FR 43560 Jul 22 2015, effective Oct 3 2016); 32 CFR §232.4(c)(1)(iii)(A) finance charges; 32 CFR §232.4(c)(1)(iii)(B) bona-fide application fee exclusion; 32 CFR §232.4(c)(1)(iii)(C) bona-fide participation fee exclusion, $100/yr limit at 32 CFR §232.4(c)(2)(ii)(B)",
+      "table_version": "MLA-DOD-32CFR232-2016-10-03",
+      "term_months": 12,
+      "total_excluded_charges": 0,
+      "total_includable_charges": 1000
+    }
+  }
+}

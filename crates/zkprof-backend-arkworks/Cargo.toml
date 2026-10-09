@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "zkprof-backend-arkworks"
+description = "Groth16/BN254 backend for zkprof-web: a real circuit, and a prover re-run with per-primitive spans."
+readme = "README.md"
+
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+
+[lints.clippy]
+needless_borrow = "allow"
+needless_to_vec = "allow"
+unused_self = "allow"
+string_to_string = "allow"
+
+[dependencies]
+zkprof-core = { workspace = true }
+
+# The backend trait lives in zkprof-core; this crate implements it.
+
+# Pinned to the 0.5 line. arkworks is pre-1.0 and its 0.4 -> 0.5 move renamed
+# and reshaped enough of the constraint-system API that pinning by minor is
+# the only safe option.
+ark-bn254 = "0.5"
+# `r1cs` gates the whole gadget half of the crate, including the Poseidon
+# sponge gadget this backend's circuit is built from. Without it the crate
+# compiles down to native primitives only.
+#
+# `crh` gates `crh::sha256`, which carries both the SHA-256 gadget and the
+# native hash the witness is built from. It is named here rather than left to
+# feature unification: this crate's imports should not depend on some other
+# crate in the graph happening to ask for the same feature.
+ark-crypto-primitives = { version = "0.5", features = ["r1cs", "crh"] }
+ark-ec = "0.5"
+ark-ff = "0.5"
+ark-groth16 = "0.5"
+ark-poly = "0.5"
+# Only for `FpVar` and the `Boolean`/`CondSelectGadget` prelude: the circuit
+# writes its own constraints, so it needs the constraint-system variable
+# types directly rather than through a gadget library.
+ark-r1cs-std = "0.5"
+ark-relations = "0.5"
+ark-serialize = "0.5"
+ark-std = "0.5"
+
+[dev-dependencies]
+serde_json = { workspace = true }

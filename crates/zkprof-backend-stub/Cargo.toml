@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+
+[package]
+name = "zkprof-backend-stub"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/PostOakLabs/zkprof-harness"
+description = "Stub backend that emits schema-valid reports with null timings and backend_status = \"stub\""
+
+[dependencies]
+zkprof-core = { path = "../zkprof-core" }
+serde = { workspace = true, features = ["derive"] }
+
+[dev-dependencies]
+zkprof-core = { path = "../zkprof-core" }

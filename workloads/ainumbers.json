@@ -1,0 +1,64 @@
+{
+  "$schema": "https://postoaklabs.github.io/engineering-decision-schema/zkprof-report.schema.json",
+  "report_version": "0.1.0",
+  "_note": "This is a WORKLOAD PROFILE, not a proving report. It reuses the zkprof report schema's vocabulary for the fields it can fill and carries everything workload-specific in the documented x_workload extension block. Because the report schema is closed (additionalProperties:false), x_workload is a documented extension and a validator running on the report schema would flag it — expected, same pattern as W3.13's docs.",
+  "x_workload": {
+    "instrument": "ainumbers-workload-profile",
+    "profile_version": "0.1.0",
+    "source": "AINumbers proving records, 2026-08-30 (supplied facts block; every number below traces to it)",
+    "system": {
+      "zkvm": "risc0 zkVM 3.0.5 (pinned)",
+      "field": "BabyBear",
+      "hash": "Poseidon2",
+      "proof_pipeline": "STARK succinct receipt -> groth16-bn254 wrap",
+      "wrap_curve": "bn254",
+      "wrap_time_seconds": { "min": 64, "max": 128, "measured": true },
+      "constraint_scale_analog": "user_cycles (risc0 is a zkVM, not a circuit; cycles are the constraint analog — not interchangeable with gates)"
+    },
+    "guest": {
+      "type": "custom JS-execution guest",
+      "kernel_vm": "deterministic",
+      "guest_source": "guest C + toolchain",
+      "image_ids_live": 6,
+      "receipts": 585,
+      "mixed_image_receipts": "status quo"
+    },
+    "workload": {
+      "compliance_kernels": 640,
+      "fixture_vectors": 2246,
+      "proof_unit": "one vector's execution"
+    },
+    "cycle_distribution": {
+      "typical": { "min": 4000000, "max": 13400000 },
+      "recent_batch_cycles": [5030000, 13360000, 4050000, 9080000],
+      "recent_batch_wall_seconds": { "min": 138, "max": 193, "gpu": "RTX 3080-class" },
+      "mid_outlier_cycles": 102400000,
+      "mid_outlier_wall": { "min_seconds": 900, "max_seconds": 1500 },
+      "heavy_outlier_cycles": 839700000,
+      "heavy_outlier_wall": { "min_seconds": 5400, "max_seconds": 7200 },
+      "heavy_outlier_cause": "in-guest secp256k1 ECDSA recovery (known crypto-in-guest cost cliff)"
+    },
+    "classification_rule": {
+      "cadence_provable": "<30M cycles",
+      "downtime_lane": ">30M cycles"
+    },
+    "verification": {
+      "bn254_verifySeal_in_production": true,
+      "receipts_served_publicly": true,
+      "browser_verify": "feasible today",
+      "browser_prove": "not attempted client-side"
+    },
+    "browser_prover_thresholds_derived": {
+      "method": "linear extrapolation from the supplied recent_batch points (derived/approximate, not a measurement)",
+      "cycles_per_second": { "derived_low": 26062, "derived_high": 29348, "basis": "5.03e6/193s and 4.05e6/138s" },
+      "cadence_tier_bound": { "seconds": { "at_low": 1151, "at_high": 1022 }, "note": "30M-cycle kernel at the derived cycles/s; the whole cadence-provable tier is on the order of 17-19 min per proof on the supplied GPU class" },
+      "out_of_reach": "the >30M downtime lane and especially the 839.7M ECDSA cliff (~1.5-2h on GPU) are out of reach for any prover slower than the existing GPU path"
+    },
+    "open_items": [
+      "exact witness sizes",
+      "current end-to-end p50/p95 from production",
+      "whether browser-side proving is a goal at all",
+      "the actual cadence window (the derived 17-19 min is an extrapolation, not a target)"
+    ]
+  }
+}

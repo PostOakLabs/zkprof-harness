@@ -1,0 +1,55 @@
+{
+  "$schema": "https://postoaklabs.github.io/engineering-decision-schema/zkprof-report.schema.json",
+  "report_version": "0.1.0",
+  "target": {
+    "kind": "wasm-scalar",
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+    "os": "Win32",
+    "cpu": "wasm32"
+  },
+  "system": {
+    "proof_system": "groth16",
+    "curve_or_field": "bn254",
+    "constraint_count": 15553
+  },
+  "workload_id": "groth16-bn254-merkle-poseidon-d64",
+  "total_ms": 3101.145000010729,
+  "phases": [],
+  "primitives": [
+    {
+      "name": "witness_gen",
+      "ms": 338.375,
+      "share": 0.10930660765997645
+    },
+    {
+      "name": "ntt_fft",
+      "ms": 164.53999999165535,
+      "share": 0.053152003615693826
+    },
+    {
+      "name": "field_arith",
+      "ms": 1.625,
+      "share": 0.0005249301439156608
+    },
+    {
+      "name": "msm",
+      "ms": 2589.074999988079,
+      "share": 0.8363590845244195
+    },
+    {
+      "name": "other",
+      "ms": 2.0349999964237213,
+      "share": 0.0006573740559945066
+    }
+  ],
+  "memory": {
+    "peak_heap_bytes": 69795840
+  },
+  "threads": {
+    "count": 1,
+    "shared_array_buffer": false
+  },
+  "crossOriginIsolated": true,
+  "timer_resolution_us": 4.999995231628418,
+  "iterations": 1
+}

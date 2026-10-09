@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "zkprof-marshal"
+description = "The JS<->WASM boundary microbench: one Poseidon hash per crossing vs batched, against a pure-copy baseline."
+readme = "README.md"
+
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+# `cdylib` is what wasm-bindgen consumes; `rlib` keeps the crate in the
+# workspace's native `cargo test` / `clippy` runs, which have no wasm
+# toolchain. The measurement logic in `bench.rs` is target-independent and
+# is unit-tested natively.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+zkprof-core = { workspace = true }
+# Only for the Poseidon hash itself: `poseidon_config` and `compress`. The
+# point of the bench is the boundary around a real primitive, so substituting
+# a stand-in hash would measure the wrong thing.
+zkprof-backend-arkworks = { workspace = true }
+
+# The field elements the Poseidon payload is made of, and the sponge config
+# type. `sponge` is not a default feature of ark-crypto-primitives, and
+# depending on it implicitly would make this crate compile or not depending on
+# what some other crate in the workspace happened to enable.
+ark-bn254 = "0.5"
+ark-crypto-primitives = { version = "0.5", features = ["sponge"] }
+# `PrimeField` for `from_le_bytes_mod_order` and `into_bigint`; `BigInteger`
+# for `to_bytes_le`.
+ark-ff = "0.5"
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Native builds never see this: the exported surface is wasm32-only.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+
+[lints]
+workspace = true

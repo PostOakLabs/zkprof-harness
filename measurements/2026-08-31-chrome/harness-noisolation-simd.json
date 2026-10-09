@@ -1,0 +1,55 @@
+{
+  "$schema": "https://postoaklabs.github.io/engineering-decision-schema/zkprof-report.schema.json",
+  "report_version": "0.1.0",
+  "target": {
+    "kind": "wasm-simd",
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+    "os": "Win32",
+    "cpu": "wasm32 +simd128"
+  },
+  "system": {
+    "proof_system": "groth16",
+    "curve_or_field": "bn254",
+    "constraint_count": 15553
+  },
+  "workload_id": "groth16-bn254-merkle-poseidon-d64",
+  "total_ms": 2951.199999988079,
+  "phases": [],
+  "primitives": [
+    {
+      "name": "witness_gen",
+      "ms": 330,
+      "share": 0.11207335710646969
+    },
+    {
+      "name": "ntt_fft",
+      "ms": 148.40000000596046,
+      "share": 0.050399049076570036
+    },
+    {
+      "name": "field_arith",
+      "ms": 1.399999976158142,
+      "share": 0.0004754627190212743
+    },
+    {
+      "name": "msm",
+      "ms": 2462.4000000059605,
+      "share": 0.8362710137564817
+    },
+    {
+      "name": "other",
+      "ms": 2.300000011920929,
+      "share": 0.0007811173414572692
+    }
+  ],
+  "memory": {
+    "peak_heap_bytes": 69795840
+  },
+  "threads": {
+    "count": 1,
+    "shared_array_buffer": false
+  },
+  "crossOriginIsolated": false,
+  "timer_resolution_us": 99.99999403953552,
+  "iterations": 1
+}

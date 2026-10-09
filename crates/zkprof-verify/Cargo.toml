@@ -1,0 +1,37 @@
+[package]
+name = "zkprof-verify"
+version = "0.1.0"
+edition = "2021"
+description = "Client-side verifier for risc0 groth16-bn254 receipts (receipt-verifier-2)."
+license = "Apache-2.0"
+readme = "README.md"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+risc0-zkvm = { version = "=3.0.5", default-features = false }
+risc0-binfmt = "3.0.5"
+serde = { version = "1", features = ["derive"] }
+# Workspace entry carries `float_roundtrip` so JSON numbers round-trip
+# bit-identically. Using it (rather than a bare `serde_json = "1"`) is
+# deliberate: the receipt verifier canonicalizes JSON in-crate, and native CI
+# and the browser wasm build must produce *identical* canonical bytes. The
+# `preserve_order` addition keeps the workspace Map as insertion-order, which
+# `canonical_jcs` and the hypothesis test rely on (see VER-12/VER-14).
+serde_json = { workspace = true, features = ["preserve_order"] }
+base64 = "0.21"
+hex = "0.4"
+
+# Only used by the `dump` binary (Task 1 oracle): round-trip the risc0 groth16
+# verifying key through arkworks to extract the alpha/beta/gamma/delta/IC
+# coordinates for the JS twin. Same versions risc0-groth16 already pulls.
+ark-bn254 = { version = "0.5", default-features = false, features = ["std"] }
+ark-groth16 = { version = "0.5", default-features = false, features = ["std"] }
+ark-serialize = { version = "0.5", default-features = false, features = ["std"] }
+ark-ff = { version = "0.5", default-features = false, features = ["std"] }
+num-bigint = { version = "0.4", default-features = false, features = ["std"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "=0.2.127"
+serde-wasm-bindgen = "0.6"

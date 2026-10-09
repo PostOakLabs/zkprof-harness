@@ -1,0 +1,45 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "zkprof-core"
+description = "Timing attribution core for zkprof-web: span API, clock abstraction and report model."
+readme = "README.md"
+
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[features]
+default = []
+
+# Stretch goal, declared here because `browser::build_target_kind` is what
+# turns the flag into a reported `target.kind`, and that lives in this crate
+# so the two wasm entry points cannot disagree about the build they are in.
+# Enabling it does not add a worker pool anywhere; see the `zkprof-wasm`
+# manifest for what it does and does not do.
+web-threads = []
+
+# `Performance` supplies now(). `Window` is the object `performance` hangs off.
+# `Navigator` supplies the `userAgent` and `platform` strings `browser` copies
+# verbatim into every report's `target`.
+# js-sys is here for Reflect: web-sys 0.3.104 has no generated binding for
+# `Window.crossOriginIsolated`, so the flag is read reflectively. See
+# `PerformanceClock::cross_origin_isolated`.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+web-sys = { workspace = true, features = ["Navigator", "Performance", "Window"] }
+js-sys = { workspace = true }
+# Only for `JsValue`, which js-sys re-exports privately.
+wasm-bindgen = { workspace = true }
+
+# Integration tests inspect the vendored schema directly, which the library
+# only exposes as a string.
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

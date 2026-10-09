@@ -1,0 +1,85 @@
+<!doctype html>
+<!--
+SPDX-License-Identifier: Apache-2.0
+
+Landing page. Serve `web/` (the default) with:
+
+    python web/server.py                  # cross-origin isolated (fine clock)
+    python web/server.py --no-isolation   # the other deployment context
+
+This page exists because there is more than one page, and a server rooted at
+a directory should have an index in it. It measures nothing.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>zkprof-web</title>
+    <link rel="stylesheet" href="./shared.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <h1>zkprof-web</h1>
+      <p class="tagline">
+        Browser-native profiling for zero-knowledge proving. Two pages, one
+        schema, nothing measured until you press a button.
+      </p>
+    </header>
+
+    <main>
+      <section class="panel" aria-labelledby="pages-heading">
+        <h2 id="pages-heading">Pages</h2>
+
+        <h3><a href="./harness/">Harness</a></h3>
+        <p class="panel-note">
+          One Groth16/BN254 prover, two circuits to point it at &mdash;
+          Merkle-Poseidon, and the SHA-256 preimage circuit csp-benchmarks
+          measures &mdash; compiled to <code>wasm32-unknown-unknown</code> in
+          two profiles, scalar and <code>+simd128</code>, run in your browser
+          and reported as schema-valid JSON with time attributed per
+          cryptographic primitive.
+        </p>
+
+        <h3><a href="./marshalling-bench/">Marshalling bench</a></h3>
+        <p class="panel-note">
+          What it costs to cross the JavaScript &harr; WebAssembly boundary, and
+          how much of that cost goes away if you batch across it: one Poseidon
+          compression per crossing, then batched &times;8, &times;32 and
+          &times;128, against a pure-copy baseline.
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="context-heading">
+        <h2 id="context-heading">Two deployment contexts</h2>
+        <p class="panel-note">
+          Browsers coarsen <code>performance.now()</code> to blunt timing side
+          channels, and the coarsening depends on whether the page is
+          cross-origin isolated: roughly 5&nbsp;µs when it is, roughly
+          100&nbsp;µs when it is not. That is a 20&times; difference in the
+          resolution of every number here, so it is part of the measurement
+          rather than a deployment detail.
+        </p>
+        <p class="panel-note">
+          Both contexts are runnable on purpose:
+          <code>python web/server.py</code> sends
+          <code>Cross-Origin-Opener-Policy: same-origin</code> and
+          <code>Cross-Origin-Embedder-Policy: require-corp</code>, and
+          <code>--no-isolation</code> sends neither. Every report records which
+          context it came from, and which clock resolution it measured.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footnote">
+      <p>
+        Nothing in this repository is a published benchmark. Every figure these
+        pages produce is measured in the browser that opened them, at the
+        moment a button was pressed.
+      </p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<!--
+SPDX-License-Identifier: Apache-2.0
+
+The zkprof-web harness page. Serve it with:
+
+    python web/server.py                  # cross-origin isolated (fine clock)
+    python web/server.py --no-isolation   # the other deployment context
+
+Both contexts matter: browsers coarsen performance.now() when the page is not
+cross-origin isolated, so the same workload reports a different
+timer_resolution_us under each. That difference is part of what this harness
+exists to measure, not a deployment detail.
+
+The page loads no external resources. Under
+Cross-Origin-Embedder-Policy: require-corp, a CDN script would be blocked
+anyway -- so there is nothing to add and nothing to break.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      No inline script or style anywhere in this page, which is what lets the
+      CSP below omit 'unsafe-inline'. 'wasm-unsafe-eval' is required: without
+      it the browser refuses to compile the module, with an error that does
+      not mention CSP.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; worker-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>zkprof-web harness</title>
+    <!--
+      Shared chrome, one directory up. Both pages of this repo use it, and
+      the server serves `web/`, so both can reach it.
+    -->
+    <link rel="stylesheet" href="../shared.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <h1>zkprof-web harness</h1>
+      <p class="tagline">
+        One Groth16/BN254 prover, two circuits to point it at &mdash;
+        Merkle-Poseidon, and the SHA-256 preimage circuit csp-benchmarks
+        measures &mdash; compiled to <code>wasm32-unknown-unknown</code> in two
+        profiles, scalar and <code>+simd128</code>, run in your browser and
+        reported as schema-valid JSON.
+      </p>
+    </header>
+
+    <main>
+      <section class="panel" aria-labelledby="context-heading">
+        <h2 id="context-heading">Deployment context</h2>
+        <p class="panel-note">
+          Read here, on the main thread, before anything is measured. The
+          report carries its own copy of <code>crossOriginIsolated</code>; if
+          the two disagree, the worked example is running in a context the
+          report does not describe.
+        </p>
+        <dl class="facts" id="page-context"></dl>
+        <p class="isolation-note" id="isolation-note"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="module-heading">
+        <h2 id="module-heading">Module</h2>
+        <p class="panel-note" id="module-status">Loading&hellip;</p>
+        <dl class="facts" id="module-context"></dl>
+      </section>
+
+      <section class="panel" aria-labelledby="run-heading">
+        <h2 id="run-heading">Run</h2>
+        <form class="controls" id="controls">
+          <fieldset class="control" id="profile-control">
+            <legend>Profile</legend>
+            <label>
+              <input type="radio" name="profile" value="scalar" checked />
+              <span>scalar</span>
+            </label>
+            <label>
+              <input type="radio" name="profile" value="simd" />
+              <span>+simd128</span>
+            </label>
+          </fieldset>
+
+          <div class="control">
+            <label for="circuit">Circuit</label>
+            <select id="circuit" name="circuit">
+              <option value="merkle-poseidon" selected>merkle-poseidon</option>
+              <option value="sha256">sha256</option>
+            </select>
+            <p class="hint">
+              <code>sha256</code> is a canonical circuit from csp-benchmarks,
+              so a number measured here can be compared with that suite — and
+              against the same circuit run natively by the CLI. That
+              cross-target delta is the whole point of the tool.
+            </p>
+          </div>
+
+          <div class="control" id="depth-control">
+            <label for="depth">Merkle depth</label>
+            <input
+              type="number"
+              id="depth"
+              name="depth"
+              value="64"
+              min="1"
+              max="128"
+              step="1"
+              required
+            />
+            <p class="hint">
+              One Poseidon permutation per level. 64 is 15,553 constraints.
+              Setup is not measured, but it does cost time before the run
+              starts.
+            </p>
+          </div>
+
+          <div class="control" id="bytes-control" hidden>
+            <label for="bytes">Preimage bytes</label>
+            <select id="bytes" name="bytes">
+              <option value="128" selected>128</option>
+              <option value="256">256</option>
+              <option value="512">512</option>
+              <option value="1024">1024</option>
+              <option value="2048">2048</option>
+            </select>
+            <p class="hint">
+              The sizes csp-benchmarks measures under
+              <code>BENCH_INPUT_PROFILE=full</code>. A size their exporter
+              would reject is refused rather than measured.
+            </p>
+          </div>
+
+          <div class="control">
+            <label for="seed">Seed</label>
+            <input
+              type="number"
+              id="seed"
+              name="seed"
+              value="24237"
+              min="0"
+              step="1"
+              required
+            />
+            <p class="hint">
+              Fixed witness, setup and prover randomness. Two runs are only
+              comparable at the same seed and depth.
+            </p>
+          </div>
+
+          <div class="control control-actions">
+            <button type="submit" id="run-button">Run workload</button>
+          </div>
+        </form>
+        <p class="status" id="run-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel" id="result-panel" aria-labelledby="result-heading" hidden>
+        <h2 id="result-heading">Report</h2>
+        <dl class="facts" id="result-summary"></dl>
+
+        <div class="callout" id="plan-callout" hidden></div>
+        <div class="callout callout-warn" id="below-target-callout" hidden></div>
+
+        <h3>Primitives</h3>
+        <table class="data" id="primitives-table">
+          <thead>
+            <tr>
+              <th scope="col">Primitive</th>
+              <th scope="col" class="num">Time</th>
+              <th scope="col" class="num">Per iteration</th>
+              <th scope="col" class="num">Share</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <h3>Phases</h3>
+        <table class="data" id="phases-table">
+          <thead>
+            <tr>
+              <th scope="col">Phase</th>
+              <th scope="col" class="num">Time</th>
+              <th scope="col" class="num">Share of total</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="actions">
+          <button type="button" id="download-button">Download report JSON</button>
+          <button type="button" id="copy-button">Copy JSON</button>
+        </div>
+
+        <details class="raw">
+          <summary>Raw JSON</summary>
+          <pre id="raw-json"></pre>
+        </details>
+      </section>
+
+      <section class="panel" id="compare-panel" aria-labelledby="compare-heading" hidden>
+        <h2 id="compare-heading">Scalar vs +simd128</h2>
+        <p class="panel-note" id="compare-note"></p>
+        <table class="data" id="compare-table">
+          <thead>
+            <tr>
+              <th scope="col">Profile</th>
+              <th scope="col" class="num">Total</th>
+              <th scope="col" class="num">Iterations</th>
+              <th scope="col" class="num">Clock</th>
+              <th scope="col" class="num">Relative</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+
+    <footer class="footnote">
+      <p>
+        Everything on this page is measured in this browser, at the moment you
+        pressed the button. Nothing here is a published benchmark.
+      </p>
+    </footer>
+
+    <script type="module" src="./harness.js"></script>
+  </body>
+</html>

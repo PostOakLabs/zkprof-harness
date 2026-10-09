@@ -1,0 +1,152 @@
+{
+  "bundle_version": "0.1",
+  "receipt": {
+    "type": "ZkVmReceipt",
+    "system": "risc0",
+    "receiptFormat": "groth16-bn254",
+    "imageId": "sha256:a1a0bc89b5b1febaeda3519f6dbade0fa5ac16beeb143c4e1b01689573567bc6",
+    "seal": "BkQ5xQpVaetx4TNjre8T2q4trOLdqSig/QlLGil+DDwwIhNbQw7lMp4p+fRI/DR4nSztHcxqKVLvgKgNqb8pvRQ/1KkgmcveYlMPTgMk8o0abip+7yb/VDxl08pZV9EjHeO1tAUgdyZ4kQyJH021wJJ5XvctdQG6+KktM7dBIp0LDnXvtcqM/pZf4HFkviR5zdDrxNqzGKeKUzGfQyb0qx8ecQMBX0yKTnZCTR/CAoYO7B6gzxvCfJ94boDeYeryL9RWerwpzuhEF1mpoC1RP7mzUVBkfyYEBmAsByAtO1UBmu+H351jfAU1u5s+b9MgAF6OtEU5Dix99gNEHewOFg==",
+    "journal": {
+      "chaingraph_version": "0.4.0",
+      "kernel_digest": "sha256:1995b8044643af3b0040b0141b607050d90479fefaa911f9b9134eecc99cf250",
+      "output": {
+        "breaches": [],
+        "cumulative_ok": true,
+        "cycles_ok": true,
+        "draw_count": 3,
+        "draw_merkle_root": "leaf-commit:3:74",
+        "residual_envelope": 735,
+        "total_drawn": 265,
+        "verdict": "CONFORMANT"
+      }
+    }
+  },
+  "journal_contract": {
+    "spec": "SPEC.md §18.7",
+    "serialization": "rfc8785-jcs+utf8",
+    "journal_digest": "sha256:592d2fb7f3231c1617bb7d8a55b2046a8045a48d9f34c09e4e1370acf834092c",
+    "claim_digest": "sha256:eda509c3a926dc7e7cd00f93f6ac65d61a3a9a53a5da876d75c3976a772d105a"
+  },
+  "provenance": {
+    "repo": "PostOakLabs/ainumbers",
+    "receipt_source": "chaingraph/kernels/fixtures/compute-proof/art-106-tempo-subscription-reconciler.receipt.json",
+    "receipt_source_sha256": "6e5e61ae87280c153a65aa9a2cc21fa814c7ed79e41bc639967a8c799f6d1ff8",
+    "anchor_source": "registry/errata/checkpoint.sigsum-record.json",
+    "checkpoint_source": "registry/errata/checkpoint"
+  },
+  "anchor": {
+    "type": "c2sp-tlog-proof-v1",
+    "record": {
+      "anchor_type": "c2sp-tlog-proof-v1",
+      "log_origin": "sigsum.org/v1/tree/44ad38f8226ff9bd27629a41e55df727308d0a1cd8a2c31d3170048ac1dd22a1",
+      "log_url": "https://seasalp.glasklar.is",
+      "log_public_key": "0ec7e16843119b120377a73913ac6acbc2d03d82432e2c36b841b09a95841f25",
+      "anchored_hash": "sha256:55f9e86b272fe9330b6f881787cbff6cbc0345cb8b613be6fa6fa1b72f975113",
+      "leaf": {
+        "checksum": "e94c5b85fd49f57a66483ea95e662824e13ee94a1dcc5617f62586dadfdfc25b",
+        "signature": "48f64d22d13344f20220ceed05f3e672846906f4b486142a2e8aeb17c65f0f9c7f76d588a09a7e19f64b7db0a5b384081b54f9110a37c7b63f6750f38625260b",
+        "public_key": "64ffed0396abb761968b34ce849b7b09bc47b8a492ba2efd006b6b8f5622ceca"
+      },
+      "tree_head": {
+        "size": 63986,
+        "root_hash": "f35cb0d4888566130374af82ceb4df4a1037daca8c1d68240a628635aae86718",
+        "log_signature": "85dc6ad862c1a3f54ff35d5e0362a084bf583ef08adae049b70c51fd2b4de41ecc8def3c698d566f234ec0069b61020d9c5ccea5570ac8b4fc63a21ab2ce5502"
+      },
+      "inclusion_proof": {
+        "leaf_index": 61421,
+        "path": [
+          "8533fb9e79ed56800acb53520c5f213eb9e13c7f56958b86f427e28d970e8e51",
+          "7fa170e44f15b13782a3ad68b85d6e66ae7f8e83661eafc8612b1e0b410fa041",
+          "50ecfd2b3d0df0e965d6d026161861b2db2019420f19cfd856989d57cde453d8",
+          "df3d9ce2aad777d55b6a8ad593dcd17f6e5a7ae9f5776300c1189254a9bdce21",
+          "7c3594b6351152df0dfd96c7981e086e43d63170d8a5c51f9aa72b481979213d",
+          "5efb664a38c2a71305718e1f1efc4738d937e7e1fd164c107221232ecbfe1917",
+          "4aa5b788182d7e535bd8f7cbb0e8954c1fee57eb09a0c0891045e48a867caa49",
+          "14cc9c72ce811643e078b328bdcb8351d6daa492805414de1fb47f4d8582eabf",
+          "2a9d41113a4a980924cb7ec146b65fb5045ea3a3434786eca87ef13b4de07429",
+          "822c4f1af3d29ab424a2f6c0aedac8d4cea496c28a3a8dc1a88883069272c290",
+          "678246c404a33ce4e7837e5ffeb24747c67f436e7f3a55b209e494debf7bc256",
+          "ad86d288ac0d40799debd6d4deac1e5479323019ed74a8de8ceabb079dda3ed5",
+          "2077bd37e3493290b0301fdd1fba99833be353fff4d91cdd59726d83e334fc41",
+          "1fc9804ab91d30a93d0151c1cbf72768c5d6966642f0c49161ed3ccc68fe5b60",
+          "a963c87f350f84a08cc8ba85db84dc4ceedb7381a7a43ec09f537fb14e87b1a7",
+          "de044b87840ca91151f7bf64908851698ae4e905e5d9114f2779aa1112c21a0e"
+        ]
+      },
+      "witness_cosignatures": [
+        {
+          "key_hash": "81538d254f0a67aa07172826ef46fe0cd04b7425bd634a50bb0a8419d55fa65f",
+          "timestamp": 1788442407,
+          "signature": "3094411c96802047c1dd3567542a2896f5a62ceb33d55a1fa1ced5343b2fd258e7c480601d23d1e0f3d3da95e3c47ae2b68ca33b9c881a780fd7c15c1a0f4101"
+        },
+        {
+          "key_hash": "d59098d686f47ec1d4d1984c8ac0ab97a3d8a65c7ba8cb6422ada0fae927e194",
+          "timestamp": 1788442407,
+          "signature": "68c9bf36c123174c51a654504f2a5372eb596edaf66559db1ede80603878789d722f6b041fd3b039211e2937ba84459a38791956d3fd839fee506e14dc587600"
+        },
+        {
+          "key_hash": "cd02db1cc0488c28245d7c3ff50b3e214334c067f2571e849425146bb6bd173d",
+          "timestamp": 1788442407,
+          "signature": "585cb25990b484962c71f685709d1450a809cf92b8a54ca01e0659c4c2e8b672307e335431f9bc57fc6cc592b9c03e39bb28fbdb3bced2f208bc92a7c478cc00"
+        },
+        {
+          "key_hash": "9a0dcddbd96f6d6d404227b5ff23de7a43f25cdde9790af5ace332d347fac49a",
+          "timestamp": 1788442407,
+          "signature": "761d50971e163010f35eac74c597329205abf53871aa42f5dfcf49a061d56e80691d2048b26aadd6c1e71cc591175ef213bfc12e14c1adccbfa6f81c305e8a03"
+        },
+        {
+          "key_hash": "5da2b3803c2f802eed9744b74e3e4a3d31e1e77ed994ef56730d57fa52f698a5",
+          "timestamp": 1788442407,
+          "signature": "6d6eba9ca6c29f276f4dbbfd47f286f486d1bd8537cd063655ac8697a1f9cbadce661e437a165956135dfc35bea07e596fa9cdac3be1c67314ddd81087bc570d"
+        },
+        {
+          "key_hash": "3573fb7fdab7434cd0dad9fd6460abf420388055db8aaaec177c248f03a990cc",
+          "timestamp": 1788442407,
+          "signature": "ac73a0eb2b712dd57dbabe400a8253a847e8ac6fc7c474787ef6b9182e1f20dfeb4561c67445b1ca0bdc1674bd0f5ec87add13353c5f50d037dd5e8dfd60e006"
+        },
+        {
+          "key_hash": "ff2f237a707a2d3a6adfb1600d3375cafe4527ba4fcec793e6093b9b1a4bd79a",
+          "timestamp": 1788442407,
+          "signature": "18288acfb96e650d0d4f3da616867235514def1c5f91747b325a8b8a724ccf60d356fc2fe62b42e8aef8b6fb8241c70721b42ff5d111deac701993524dd8b605"
+        },
+        {
+          "key_hash": "774fafee07d3b0d9399d669676440a6301db9fa8fe2140d7d352418da25144c5",
+          "timestamp": 1788442407,
+          "signature": "5f8a8f692f2d0bcea2e3a378cfed17b2e7fba5e9443324c3098fe7df929955ba5872557fea97eb51bb1bdb1e65ffd3f5bb14cd5b8c1f1f16da63d4250cb0e604"
+        },
+        {
+          "key_hash": "f6f91669f7955f542718af9edb6a1276d88a0f8822cba9046e549d0b3796f394",
+          "timestamp": 1788442407,
+          "signature": "e43937b03e979194048f189c8b9bc78c74b981a484e533106e8c40c814217c8a062d0a65df414bd90468f5744cdf4a1dd55ad3740a98438cb0f2cf7dd25c8f0d"
+        },
+        {
+          "key_hash": "0dad9d849c57687454f100d87fa729b54cb69f7af97346613348defcba9c361c",
+          "timestamp": 1788442407,
+          "signature": "4d82514fb41c404f91b1324fb981dd72a119d8abe8c44be3c2be5bee73f48aece013740405acff27895c9d0dd8fc2649c1fa756f64d249c08a2f154329935305"
+        },
+        {
+          "key_hash": "6d6a78191e59815eff9131941fc3e08dd716a281c8b886dd67880d552e587a23",
+          "timestamp": 1788442407,
+          "signature": "d6f6ce03c7ab2a44b0d42c05cb2ffb5438dce3458f105f9f0075db3016c306f853d462c94d079bec64241996ec11836df9e9023eddfef990960dd3f0c7940208"
+        },
+        {
+          "key_hash": "6bdf03b285fce48e00ff9b199cb2b77472dcc4a112f067fa5b274929cb9504e3",
+          "timestamp": 1788442407,
+          "signature": "76d9f5d7af29f08559e2a416c9fb9d9d643f6410fa06e8fe436805cf74ab9f186fa67baa40c7e4587c43fad36c985ba8dd8536d81c96f703222d70c3c393cd03"
+        }
+      ]
+    },
+    "checkpoint_text": "ainumbers.co/registry/errata\n0\n47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\nstaleness: Past expires_at, treat it as unknown-refresh-needed — not as continuing to hold, and not as false either.\n\n— ainumbers.co/registry/errata 3QvJ0SCyzLXzQKLFgYFtVX3Pa5DEUj87QvIFkcETetfSR6cjzktBoSCeiMn1EhIr5yAowZUsK3qakHi3LCq4DO+SzAM=\n",
+    "subject": {
+      "kind": "registry-checkpoint",
+      "origin": "ainumbers.co/registry/errata",
+      "log_policy": "chaingraph/policies/ainumbers-registry-errata.tlog-policy"
+    }
+  },
+  "trust_policy": {
+    "name": "sigsum-generic-2025-1",
+    "source": "chaingraph/policies/sigsum-generic-2025-1.tlog-policy",
+    "sha256": "666d9d0b9ab2e4019769c42eaccd7d6d502a9abac45979bb9b08b7213e4f53e3",
+    "shape": "2 logs, 3 witnesses, quorum 2-of-3"
+  }
+}

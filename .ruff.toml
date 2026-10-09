@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Standalone ruff config rather than a pyproject.toml: this repository's root
+# is a Cargo workspace, and the Python here is tooling (build scripts, the
+# dev server, schema checks) rather than a distributable package. There is
+# nothing to declare a build backend for.
+#
+# Rules mirror openeda-decisions so the two repositories lint alike.
+
+line-length = 100
+target-version = "py311"
+src = [".", "tools", "web"]
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "W"]

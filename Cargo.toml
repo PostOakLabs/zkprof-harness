@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Workspace root. No [package] here on purpose: this file pins the shared
+# dependency and lint configuration and nothing else.
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["PostOakLabs"]
+repository = "https://github.com/PostOakLabs/zkprof-harness"
+
+[workspace.dependencies]
+zkprof-core = { path = "crates/zkprof-core" }
+zkprof-backend-arkworks = { path = "crates/zkprof-backend-arkworks" }
+
+# Argument parsing for the `zkprof` binary. `derive` only: no shell
+# completion, no colour, no terminal probing.
+clap = { version = "4", default-features = false, features = ["derive", "std", "help", "usage", "error-context", "suggestions"] }
+
+serde = { version = "1", features = ["derive"] }
+# `float_roundtrip` is off by default: without it serde_json emits the shortest
+# representation that parses back to *approximately* the same f64, which
+# silently perturbs the last ulp of every `ms` and `share`. Reports are written
+# by one binary (`zkprof prove`) and read by another (`zkprof diff`), so a write
+# that does not read back bit-identical is a correctness bug, not a rounding
+# detail. The cost is a slightly slower float writer on documents with a few
+# dozen numbers.
+serde_json = { version = "1", features = ["float_roundtrip"] }
+
+# wasm-only, pulled in per-target so a native build never sees them.
+wasm-bindgen = "0.2"
+# Needed by any crate that exports an `async fn` across the boundary: the
+# generated glue turns the future into a JS `Promise` via this crate, and it
+# is not re-exported by `wasm-bindgen` itself. Pinned alongside
+# `wasm-bindgen` because the two are released in lockstep.
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+# No default features: web-sys's feature list is the API surface, and every
+# crate here opts into exactly the handful of types it touches.
+web-sys = { version = "0.3", default-features = false }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+# W3.7 gates on `clippy -D warnings`, so anything in here is a deliberate
+# exemption and says why.
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# A profiling harness deals in durations and shares; naming them without units
+# is how a microseconds figure ends up read as milliseconds.
+doc_markdown = { level = "allow", priority = 1 }
+# The domain vocabulary here is clock::Clock, report::Report and
+# profiler::Profiler. Renaming the items to satisfy the lint would make them
+# worse, so the lint is off for the whole workspace rather than per-item.
+module_name_repetitions = { level = "allow", priority = 1 }

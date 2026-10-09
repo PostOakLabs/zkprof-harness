@@ -1,0 +1,184 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# The dispatched, on-demand build. Everything the pull-request gate does, plus
+# the wasm modules the gate refuses to build.
+#
+# The gate (ci.yaml) is deliberately light: minutes, no downloads, no proving.
+# Building the wasm modules needs the wasm-bindgen CLI at the exact version
+# Cargo.lock pins — a prebuilt release binary fetched and checksum-verified on
+# demand — and several minutes of optimising compile for the circuit. That is a
+# heavyweight flow, so it lives here behind workflow_dispatch, exactly as W3.7
+# schedules it.
+#
+# What this workflow NEVER does: run a benchmark. CI machines produce garbage
+# timing numbers, and the repo must never contain committed numbers that look
+# like results. The wasm build is a build, not a measurement; the harness page
+# is what turns the built modules into reports, and it runs on a developer's
+# machine via `python web/server.py`, not here.
+
+name: Dispatch build
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: "Build with --release (slower, production artifacts)"
+        type: boolean
+        default: true
+      module:
+        description: "Build one module only, or leave empty for all"
+        type: choice
+        options:
+          - ""
+          - harness
+          - marshal
+      only:
+        description: "Build one profile only, or leave empty for scalar + simd"
+        type: choice
+        options:
+          - ""
+          - scalar
+          - simd
+          - threads
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # A dispatch is a deliberate act, so it proves the whole gate first. A heavy
+  # build that starts from a broken tree is wasted minutes.
+  gate:
+    name: Lint and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          # Pinned to match ci.yaml (see the comment there).
+          rustup toolchain install 1.98.0 --profile minimal \
+            --component rustfmt --component clippy --no-self-update
+          rustup default 1.98.0
+          rustup target add wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python tooling
+        run: |
+          pip install --quiet "ruff==0.16.5"
+          ruff --version | grep -q "^ruff 0.16.5" || { echo "ruff is not 0.16.5"; exit 1; }
+
+      - name: Formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy (host)
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Clippy (wasm32, scalar)
+        run: cargo clippy --workspace --target wasm32-unknown-unknown --locked -- -D warnings
+
+      - name: Clippy (wasm32, +simd128)
+        env:
+          RUSTFLAGS: "-C target-feature=+simd128"
+        run: cargo clippy --workspace --target wasm32-unknown-unknown --locked -- -D warnings
+
+      - name: Tests
+        run: cargo test --workspace --locked
+
+      - name: Python lint
+        run: ruff check .
+
+      - name: Python format
+        run: ruff format --check .
+
+      - name: Vendored schema check
+        run: python tools/check_vendored_schema.py
+
+  # The heavy job the gate defers. Builds the browser modules in both wasm
+  # profiles by fetching the wasm-bindgen CLI matching Cargo.lock.
+  wasm-build:
+    name: Build wasm modules
+    runs-on: ubuntu-latest
+    needs: gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          # Pinned to match ci.yaml (see the comment there).
+          rustup toolchain install 1.98.0 --profile minimal --no-self-update
+          rustup default 1.98.0
+          rustup target add wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # The wasm-bindgen CLI is a prebuilt release binary, fetched and
+      # checksum-verified. `cargo install wasm-bindgen-cli` is intentionally
+      # avoided: it needs a MinGW toolchain on Windows and is otherwise slower
+      # and version-fragile. The exact asset comes from the build script so this
+      # step and the script cannot drift apart; the per-asset checksum is a
+      # committed constant in `tools/build_wasm.py` (MUSL_ASSET_SHA256) --
+      # deliberately NOT the release's own `.sha256sum` companion, which is
+      # fetched from the same mutable release tag and is therefore
+      # self-referential (whoever can re-upload the asset re-uploads the
+      # checksum). The musl asset is the only one CI downloads, so it is the
+      # one that needs the committed pin; the Windows asset's pin is the
+      # developer-machine path.
+      - name: Fetch wasm-bindgen CLI
+        run: |
+          VERSION=$(python tools/build_wasm.py --print-download-info | awk '/^version:/ {print $2}')
+          MUSL_SHA256=$(python tools/build_wasm.py --print-download-info | awk '/^musl_sha256:/ {print $2}')
+          ASSET="wasm-bindgen-${VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          BASE="https://github.com/rustwasm/wasm-bindgen/releases/download/${VERSION}"
+          echo "Fetching ${BASE}/${ASSET}"
+          curl -sSL --fail -o "${ASSET}" "${BASE}/${ASSET}"
+          echo "${MUSL_SHA256}  ${ASSET}" > "${ASSET}.sha256sum"
+          sha256sum -c "${ASSET}.sha256sum"
+          mkdir -p tools/bin
+          tar -xzf "${ASSET}" -C tools/bin/
+          echo "WASM_BINDGEN=$(pwd)/tools/bin/wasm-bindgen-${VERSION}-x86_64-unknown-linux-musl/wasm-bindgen" >> "$GITHUB_ENV"
+
+      - name: Build modules
+        run: |
+          # SECURITY: `${{ inputs.* }}` are interpolated directly into this
+          # `run:` block. This is ONLY safe because every input is `type:
+          # boolean` or `type: choice` with server-validated options, so no
+          # free text reaches the shell. Changing `release`/`module`/`only` to
+          # `type: string` converts this to a shell-injection RCE with no other
+          # edit. If an input is ever made free-text, convert it to env
+          # indirection instead of interpolating it here (see openeda ci.yaml,
+          # which passes dispatch inputs as argv for exactly this reason).
+          ARGS=()
+          if [ "${{ inputs.release }}" != "true" ]; then
+            ARGS+=( --debug )
+          fi
+          if [ -n "${{ inputs.module }}" ]; then
+            ARGS+=( --module "${{ inputs.module }}" )
+          fi
+          if [ -n "${{ inputs.only }}" ]; then
+            ARGS+=( --only "${{ inputs.only }}" )
+          fi
+          python tools/build_wasm.py "${ARGS[@]}"
+
+      # The built modules are artifacts a developer pulls down and serves
+      # locally. They are not committed (the repo never carries built blobs of
+      # this size), and they are not benchmark output.
+      - name: Upload wasm modules
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-modules
+          path: |
+            web/harness/pkg-*
+            web/marshalling-bench/pkg-*
+          if-no-files-found: warn

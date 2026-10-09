@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "zkprof-wasm"
+description = "Browser entry point for zkprof-web: the arkworks Groth16 workload exposed to JavaScript through wasm-bindgen."
+readme = "README.md"
+
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+# `cdylib` is what wasm-bindgen consumes. `rlib` is here so the crate still
+# builds on native targets: the workspace runs `cargo test --workspace` and
+# `clippy --workspace` with no target flag, and a cdylib-only crate would take
+# the whole workspace down with it.
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+
+# Stretch goal. Enabling this switches the reported `target.kind` to
+# `wasm-threads` and nothing else: the worker pool is not implemented, and
+# `run_benchmark` refuses to produce a report while it is on. The flag exists
+# so the build plumbing is wired and the unimplemented path is one grep away,
+# not so that the feature can be used.
+#
+# It forwards to `zkprof-core`, which owns the flag's only effect: deciding
+# what `target.kind` a build reports.
+web-threads = ["zkprof-core/web-threads"]
+
+[dependencies]
+zkprof-core = { workspace = true }
+zkprof-backend-arkworks = { workspace = true }
+# `derive` for the `RunResult` envelope; `serde_wasm_bindgen` would hand the
+# page a live JS object instead, but that is a new crate for the privilege of
+# skipping one `JSON.parse`, and the page needs the JSON text regardless —
+# the report is the downloadable artefact.
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Native builds never see this: the browser surface is wasm32-only.
+#
+# `web-sys` and `js-sys` are deliberately absent. This crate's only host
+# interaction is through wasm-bindgen's own generated glue; reading
+# `navigator` is `zkprof-core::browser`'s job, and it carries those deps where
+# it uses them.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+
+[lints]
+workspace = true

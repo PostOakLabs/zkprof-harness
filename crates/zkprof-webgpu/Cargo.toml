@@ -1,0 +1,55 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "zkprof-webgpu"
+description = "WebGPU plumbing verification: an M31 multiplication kernel dispatched, read back and checked against a CPU reference. Contains no performance claims."
+readme = "README.md"
+
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[lib]
+# `cdylib` is what wasm-bindgen consumes; `rlib` keeps the crate in the
+# workspace's native `cargo test` / `clippy` runs. Everything that can be
+# reasoned about without a device lives outside the wasm32-only modules and
+# is tested natively -- see the crate docs for why that split is load-bearing
+# here rather than merely tidy.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+zkprof-core = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Native builds never see wgpu, and that is not a tidy preference:
+#
+#   * wgpu's *native* backends pull `windows-*` crates that need
+#     `dlltool.exe`, which a MinGW-less Rust install does not ship. Installing
+#     one is a machine-wide change, and this repository is built on a shared
+#     machine. A workspace-wide wgpu dependency would therefore break
+#     `cargo test --workspace` on some machines that CI has to support.
+#   * nothing here runs natively. The browser's own WebGPU implementation is
+#     the backend; the native ones are not on any path this crate takes.
+#
+# The cost is that `pipeline` and `bindings` are compiled and linted by the
+# wasm32 CI job but never executed by a test.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true }
+# `webgpu_run` is an `async fn` exported to the page, so the generated glue
+# needs the future-to-Promise bridge. Only the exported entry point is async;
+# nothing else in the crate touches this.
+wasm-bindgen-futures = { workspace = true }
+wgpu = "30"
+
+# Pinned to the version `wgpu` above resolves to, because this is the
+# dependency that parses and validates the WGSL kernel in an ordinary native
+# unit test. A `naga` newer or older than the one inside `wgpu` would be
+# validating against a different front-end than the browser uses, which is
+# worse than no test: it reports success.
+[dev-dependencies]
+naga = { version = "30.0.1", features = ["wgsl-in"] }
+
+[lints]
+workspace = true

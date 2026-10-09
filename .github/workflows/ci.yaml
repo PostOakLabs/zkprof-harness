@@ -1,0 +1,117 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# The pull-request gate. Minutes, no downloads, no proving.
+#
+# What is deliberately *not* here: building the wasm modules. That needs the
+# wasm-bindgen CLI at the exact version Cargo.lock pins, fetched as a prebuilt
+# release binary, and it takes several minutes of optimising compile for a
+# 15k-constraint circuit. A full LibreLane run is not the only kind of
+# heavyweight flow the spec keeps off the gate -- this is another. It belongs
+# behind workflow_dispatch, and W3.7 is where it goes.
+#
+# The gate covers all three compilation configurations this repository
+# supports, because they are not the same code: `cfg!(target_feature =
+# "simd128")` and `cfg!(target_arch = "wasm32")` select different branches, and
+# a change that is clean on the host can be a warning -- or a bug -- on wasm32.
+#
+# Why this is here now and not at W3.7, where the spec schedules CI: global
+# rule 6 says every repository has tests *and CI*, and two work units had
+# already merged with no gate at all. Leaving the next four pull requests
+# ungated to preserve the delivery order would have been following the
+# schedule instead of the rule. W3.7 still owns fixtures and the dispatched
+# jobs.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A queued pull-request run is worthless once a new commit lands.
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  gate:
+    name: Lint and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # `--component` takes one value per flag, so it is repeated rather than
+      # given a list. rustfmt and clippy are not in the minimal profile, and
+      # wasm32 is not in any default profile.
+      # The toolchain is pinned, like ruff: a floating `stable` let Rust 1.99's
+      # new clippy lints turn an unchanged tree red. 1.98.0 is the last
+      # toolchain this tree passed on; bump it deliberately, in its own change.
+      - name: Install Rust
+        run: |
+          rustup toolchain install 1.98.0 --profile minimal \
+            --component rustfmt --component clippy --no-self-update
+          rustup default 1.98.0
+          rustup target add wasm32-unknown-unknown
+
+      # Keyed on Cargo.lock, so the three clippy configurations below share
+      # what they can and do not each start from scratch.
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python tooling
+        run: |
+          pip install --quiet "ruff==0.16.5"
+          # Assert the runner actually has the pinned version: a floating ruff
+          # can pass locally and fail on the runner (or flip the other way),
+          # which turned lint into a non-gate. Pin + assert is the fix both
+          # sibling repos applied.
+          ruff --version | grep -q "^ruff 0.16.5" || { echo "ruff is not 0.16.5"; exit 1; }
+
+      # --locked on every cargo invocation: an out-of-date Cargo.lock is a
+      # real defect here, because the build script pins the wasm-bindgen CLI
+      # to whatever the lock file resolves.
+      - name: Formatting
+        run: cargo fmt --all -- --check
+
+      - name: Clippy (host)
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Clippy (wasm32, scalar)
+        run: cargo clippy --workspace --target wasm32-unknown-unknown --locked -- -D warnings
+
+      # `target-feature` goes in RUSTFLAGS because it is a codegen flag, not a
+      # lint, and it is set here rather than in the job `env` so it does not
+      # leak into the other two configurations -- which would invalidate their
+      # cache entries and, worse, make them something other than what they
+      # claim to be checking.
+      #
+      # `-D warnings` is deliberately *not* in RUSTFLAGS: that would also apply
+      # it to dependencies and build scripts, so a warning in a third-party
+      # crate would fail this repository's gate.
+      - name: Clippy (wasm32, +simd128)
+        env:
+          RUSTFLAGS: "-C target-feature=+simd128"
+        run: cargo clippy --workspace --target wasm32-unknown-unknown --locked -- -D warnings
+
+      - name: Tests
+        run: cargo test --workspace --locked
+
+      - name: Python lint
+        run: ruff check .
+
+      - name: Python format
+        run: ruff format --check .
+
+      # The vendored schema is a copy of a file owned by edi-schema. If it
+      # drifts, every report this repository emits silently changes meaning.
+      - name: Vendored schema check
+        run: python tools/check_vendored_schema.py

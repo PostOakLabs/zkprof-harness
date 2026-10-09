@@ -1,0 +1,14 @@
+# Normalize line endings so the Linux CI runner and Windows checkouts agree.
+* text=auto eol=lf
+
+# Schemata and examples must never be re-indented or re-wrapped by tooling.
+*.json text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# rustfmt writes LF; a CRLF checkout would make `cargo fmt --check` fail on
+# every file on Windows.
+*.rs text eol=lf
+*.lock text eol=lf

@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0
+[package]
+name = "zkprof-cli"
+description = "Command line entry point: run a workload, break the time down, write a report."
+readme = "README.md"
+
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+# The binary is `zkprof`, not `zkprof-cli`: that is what the specs call it and
+# what the README's commands show.
+[[bin]]
+name = "zkprof"
+path = "src/main.rs"
+
+[dependencies]
+zkprof-core = { workspace = true }
+zkprof-backend-arkworks = { workspace = true }
+clap = { workspace = true }
+# `zkprof export --format csp-benchmarks` serialises a document the core crate
+# only models, so the writer lives here and needs the crate directly.
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

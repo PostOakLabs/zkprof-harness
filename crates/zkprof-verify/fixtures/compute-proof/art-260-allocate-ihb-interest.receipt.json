@@ -1,0 +1,49 @@
+{
+  "type": "ZkVmReceipt",
+  "system": "risc0",
+  "receiptFormat": "groth16-bn254",
+  "imageId": "sha256:a1a0bc89b5b1febaeda3519f6dbade0fa5ac16beeb143c4e1b01689573567bc6",
+  "seal": "GTp6qxHd+RUyLgUqrGdFL3RwR2jYrz6VYOS3fX15NJcgKdnhR/oZcvbQBTl2icVHG5CLlaCY5bwnWjep8Lec4A8NwuTvqkSgkHXbqNNjKkUTWCrs8YjJRHMbXuGlVNnvBRNBV7dD7XNsWbiQONTb6zMcP4UQB/iwNmocafpo4wQszZK7EGJ47U5DEl9jos/MyOApCQXo7Dd87fqVo0910htSatvZhRaAepp24nbhlcRUU5S0IK+lkd2WjG+bfw7nHD2mG3ebnSYEAK8QlUsRqrRgK0w1aHlg6sdhj0NJjGwb8k55z7l2D6pFiyBvbuYRUEZ5WLdkNkzZUARRsypvIw==",
+  "journal": {
+    "chaingraph_version": "0.4.0",
+    "kernel_digest": "sha256:6e9a9c6e57168ff88d9a4933856fe6f04ecc88942a01e7937c076d1e80235b76",
+    "output": {
+      "allocations": [
+        {
+          "allocation_basis": "PRO_RATA_NOTIONAL",
+          "balance": 500000,
+          "entity_id": "PARENT_CO",
+          "gross_interest": 1250,
+          "net_interest": 1250,
+          "withholding_amount": 0,
+          "withholding_rate": 0
+        },
+        {
+          "allocation_basis": "PRO_RATA_NOTIONAL",
+          "balance": -200000,
+          "entity_id": "SUB_A",
+          "gross_interest": 0,
+          "net_interest": 0,
+          "withholding_amount": 0,
+          "withholding_rate": 0
+        }
+      ],
+      "arm_length_rate": 0.05,
+      "base_currency": "USD",
+      "day_count_convention": "ACT/360",
+      "day_count_fraction": 0.083333,
+      "days": 30,
+      "entity_count": 2,
+      "net_interest_payable": 1250,
+      "not_legal_advice": "Not tax, legal, or accounting advice. IHB structures require review by qualified transfer-pricing advisors and local tax counsel.",
+      "oecd_tp_compliant": true,
+      "pii_note": "ZERO PII: entity IDs, aggregate balances, rates, and period parameters only. No account holder, ultimate beneficiary, or personal data enters this kernel.",
+      "pool_net_balance": 300000,
+      "pool_type": "notional",
+      "regulatory_basis": "Interest allocation per OECD TP Guidelines 2022 Ch.X §C (cash pooling, arm's-length principle); pool leader earns spread between lending/borrowing rates; arm_length_rate should reflect comparable uncontrolled transactions. Day-count per ISDA Definitions 2006 §4.16; ACT/360 default per euro money-market convention (the Eurosystem applies the day-count convention actual/360, per the ECB monetary policy glossary). Withholding tax per member jurisdiction. ZERO PII.",
+      "table_source": "OECD Transfer Pricing Guidelines 2022 Ch.I (arm's-length standard) + Ch.X §C (intra-group financial transactions, cash pooling); OECD BEPS Action 4 (interest deductibility); ACT/360, ACT/365 and 30/360 day-count conventions per ISDA Definitions 2006 §4.16",
+      "table_version": "OECD-TP-IHB-INTEREST-ALLOC-2022",
+      "total_interest_allocated": 1250
+    }
+  }
+}

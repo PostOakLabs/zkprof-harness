@@ -1,0 +1,158 @@
+<!doctype html>
+<!--
+SPDX-License-Identifier: Apache-2.0
+
+The marshalling microbench page. Serve it with:
+
+    python web/server.py                  # cross-origin isolated (fine clock)
+    python web/server.py --no-isolation   # the other deployment context
+
+Both contexts matter, and this page is where they matter most: browsers
+coarsen performance.now() when the page is not cross-origin isolated, and a
+boundary crossing is the smallest thing this repo measures. Under a 100 us
+clock a 1 us crossing is unmeasurable, so the isolation of the page decides
+whether this bench can say anything at all.
+
+The page loads no external resources. Under
+Cross-Origin-Embedder-Policy: require-corp, a CDN script would be blocked
+anyway -- so there is nothing to add and nothing to break.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      No inline script or style anywhere in this page, which is what lets the
+      CSP below omit 'unsafe-inline'. 'wasm-unsafe-eval' is required: without
+      it the browser refuses to compile the module, with an error that does
+      not mention CSP.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>zkprof marshalling bench</title>
+    <link rel="stylesheet" href="../shared.css" />
+    <link rel="stylesheet" href="./marshalling.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <h1>Marshalling bench</h1>
+      <p class="tagline">
+        What it costs to cross the JavaScript &harr; WebAssembly boundary, and
+        how much of that cost goes away if you batch across it. One Poseidon
+        compression per crossing, then batched &times;8, &times;32 and
+        &times;128, against a pure-copy baseline that crosses the same bytes
+        doing nothing.
+      </p>
+    </header>
+
+    <main>
+      <section class="panel" aria-labelledby="what-heading">
+        <h2 id="what-heading">What this measures</h2>
+        <p class="panel-note">
+          Every other row in a <code>zkprof-report</code> is compute. In a
+          browser there is a cost that is not compute, and that no compute
+          profiler can see: the crossing itself. A call into wasm is not free,
+          and a call that performs one small hash pays the whole crossing to
+          move 64 bytes.
+        </p>
+        <p class="panel-note">
+          The loop being timed lives in <em>JavaScript</em>, not in Rust. A
+          Rust loop never crosses the boundary, so a Rust loop cannot measure
+          it. The wasm side times only the work it does on its own side of the
+          crossing, and the difference is attributed to
+          <code>marshalling</code>.
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="context-heading">
+        <h2 id="context-heading">Deployment context</h2>
+        <p class="panel-note">
+          Read here, on the main thread, before anything is measured. The
+          report carries its own copy of <code>crossOriginIsolated</code>; if
+          the two disagree, the bench is running in a context the report does
+          not describe.
+        </p>
+        <dl class="facts" id="page-context"></dl>
+        <p class="isolation-note" id="isolation-note"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="module-heading">
+        <h2 id="module-heading">Module</h2>
+        <p class="panel-note" id="module-status">Loading&hellip;</p>
+        <dl class="facts" id="module-context"></dl>
+      </section>
+
+      <section class="panel" aria-labelledby="run-heading">
+        <h2 id="run-heading">Run</h2>
+        <form class="controls" id="controls">
+          <fieldset class="control" id="profile-control">
+            <legend>Profile</legend>
+            <label>
+              <input type="radio" name="profile" value="scalar" checked />
+              <span>scalar</span>
+            </label>
+            <label>
+              <input type="radio" name="profile" value="simd" />
+              <span>+simd128</span>
+            </label>
+          </fieldset>
+
+          <div class="control control-actions">
+            <button type="submit" id="run-button">Run the suite</button>
+          </div>
+        </form>
+        <p class="status" id="run-status" role="status" aria-live="polite"></p>
+        <p class="hint">
+          The suite runs eight workloads: four Poseidon batch sizes and the
+          matching copy baseline for each. Each workload probes first to size
+          its own loop, so the run takes as long as it takes.
+        </p>
+      </section>
+
+      <section class="panel" id="result-panel" aria-labelledby="result-heading" hidden>
+        <h2 id="result-heading">Results</h2>
+        <p class="panel-note" id="result-note"></p>
+
+        <table class="data" id="results-table">
+          <thead>
+            <tr>
+              <th scope="col">Workload</th>
+              <th scope="col" class="num">Calls</th>
+              <th scope="col" class="num">Payload</th>
+              <th scope="col" class="num">µs / call</th>
+              <th scope="col" class="num">µs / hash</th>
+              <th scope="col" class="num">µs / KiB</th>
+              <th scope="col" class="num">Marshalling</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="callout" id="resolution-callout" hidden></div>
+
+        <div class="actions">
+          <button type="button" id="download-button">Download all reports</button>
+          <button type="button" id="copy-button">Copy the last report</button>
+        </div>
+
+        <details class="raw">
+          <summary>Last report, as JSON</summary>
+          <pre id="raw-json"></pre>
+        </details>
+      </section>
+    </main>
+
+    <footer class="footnote">
+      <p>
+        Every figure on this page was measured in this browser, at the moment
+        you pressed the button. Nothing here is a published benchmark, and
+        nothing in this repository states how fast a boundary crossing is.
+      </p>
+    </footer>
+
+    <script type="module" src="./marshalling.js"></script>
+  </body>
+</html>
