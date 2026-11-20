@@ -55,7 +55,7 @@ impl Drop for TempReport {
 fn valid_report(workload_id: &str, msm_ms: f64, other_ms: f64) -> Value {
     let total = msm_ms + other_ms;
     serde_json::json!({
-        "$schema": "https://postoaklabs.github.io/engineering-decision-schema/zkprof-report.schema.json",
+        "$schema": "https://ainumbers.co/research/engineering-decision-schema/schemas/zkprof-report.schema.json",
         "report_version": "0.1.0",
         "target": {
             "kind": "native",

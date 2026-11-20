@@ -1,5 +1,5 @@
 {
-  "$schema": "https://postoaklabs.github.io/engineering-decision-schema/zkprof-report.schema.json",
+  "$schema": "https://ainumbers.co/research/engineering-decision-schema/schemas/zkprof-report.schema.json",
   "report_version": "0.1.0",
   "_note": "This is a WORKLOAD PROFILE, not a proving report. It reuses the zkprof report schema's vocabulary for the fields it can fill and carries everything workload-specific in the documented x_workload extension block. Because the report schema is closed (additionalProperties:false), x_workload is a documented extension and a validator running on the report schema would flag it — expected, same pattern as W3.13's docs.",
   "x_workload": {
