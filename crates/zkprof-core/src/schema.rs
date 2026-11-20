@@ -3,11 +3,11 @@
 //! The vendored report schema and its provenance.
 //!
 //! `schema/zkprof-report.schema.json` is a vendored copy of the report schema
-//! owned by `PostOakLabs/engineering-decision-schema`. The copy is currently
-//! ahead of upstream (it adds `backend_id`, `commitment_scheme` and `version`;
-//! see `tools/check_vendored_schema.py`). It lives in this repo so a `cargo test`
-//! run can check the Rust structs against it without a network fetch or a
-//! path-dependency on another repository.
+//! owned by `PostOakLabs/engineering-decision-schema`, byte-identical to that
+//! repo's tag v0.6.0 (which adopted zkprof's `backend_id`, `commitment_scheme`
+//! and `version` fields; see `tools/check_vendored_schema.py`). It lives in
+//! this repo so a `cargo test` run can check the Rust structs against it
+//! without a network fetch or a path-dependency on another repository.
 //!
 //! The copy is pinned by hash. `SCHEMA_SHA256` is not verified by this crate —
 //! Rust has no sha256 in its standard library, and pulling in a hashing
@@ -20,13 +20,13 @@ pub const SCHEMA_JSON: &str = include_str!("../schema/zkprof-report.schema.json"
 /// `$id` the schema declares for itself. Emitted as the `$schema` key of every
 /// report so `edi-validate` can identify the document kind.
 pub const SCHEMA_ID: &str =
-    "https://postoaklabs.github.io/engineering-decision-schema/zkprof-report.schema.json";
+    "https://ainumbers.co/research/engineering-decision-schema/schemas/zkprof-report.schema.json";
 
 /// sha256 of `schema/zkprof-report.schema.json`.
 ///
 /// Pins the vendored copy: `tools/check_vendored_schema.py` (run by CI) fails if
 /// the file changes without this constant changing with it.
-pub const SCHEMA_SHA256: &str = "6ac3b291715a7efc1acd7fc0a50ad6fb3acc6a877d09fe3b8e099a39aab49bfe";
+pub const SCHEMA_SHA256: &str = "df99708d95aa9bcf3c41fbb8e38d75e8bb18a898f308f5da5157cdd246b68361";
 
 /// Version stamped into every report this crate emits.
 pub const REPORT_VERSION: &str = "0.1.0";
